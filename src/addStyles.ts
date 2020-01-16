@@ -4,12 +4,12 @@ import jscodeshift, {
   ObjectPattern,
   ASTPath,
   Node,
+  JSCodeshift,
 } from 'jscodeshift'
 const j = jscodeshift.withParser('babylon')
 const { statement } = j.template
 import { lowerFirst } from 'lodash'
 import hasFlowAnnotation from './hasFlowAnnotation'
-import Collection from 'jscodeshift/src/Collection'
 import pathsInRange from 'jscodeshift-paths-in-range'
 import * as nodepath from 'path'
 
@@ -39,24 +39,31 @@ type Filter = (
 ) => boolean
 
 export default function addStyles(
-  root: Collection.Collection<Node>,
+  fileInfo: { path: string; source: string },
+  api: {
+    jscodeshift: JSCodeshift
+    stats: (value: string) => void
+    report: (value: string) => void
+  },
   options: {
-    file: string
-    selection?: { start: number; end: number }
-    position?: number
-    filter?: Filter
-    Theme?: {
-      identifier: string
-      file: string
-    }
+    selectionStart?: string
+    selectionEnd?: string
+    themeImport?: string
   }
-): void {
-  const { file, selection, position } = options
+): string {
+  const j = api.jscodeshift
+  const file = fileInfo.path
+  const root = j(fileInfo.source)
   let filter: Filter
-  if (options.filter) filter = options.filter
-  else if (selection) filter = pathsInRange(selection.start, selection.end)
-  else if (position != null) filter = pathsInRange(position)
-  else filter = (): boolean => true
+  if (options.selectionStart) {
+    const selectionStart = parseInt(options.selectionStart)
+    const selectionEnd = options.selectionEnd
+      ? parseInt(options.selectionEnd)
+      : selectionStart
+    filter = pathsInRange(selectionStart, selectionEnd)
+  } else {
+    filter = (): boolean => true
+  }
 
   const isTypeScript = /\.tsx?$/i.test(file)
   const isFlow = hasFlowAnnotation(root)
@@ -66,18 +73,14 @@ export default function addStyles(
     statement`import { withStyles } from '@material-ui/core/styles'`
   )
   let Theme
-  if (options.Theme && (isFlow || isTypeScript)) {
-    ;({ Theme } = addImports(
-      root,
-      statement([
-        `import { ${isFlow ? 'type ' : ''}${
-          options.Theme.identifier
-        } } from '${nodepath.relative(
-          nodepath.dirname(file),
-          options.Theme.file
-        )}'`,
-      ])
-    ))
+  if (options.themeImport && (isFlow || isTypeScript)) {
+    const themeImport = statement([options.themeImport])
+    const themeName = themeImport.specifiers[0].local.name
+    themeImport.source.value = nodepath.relative(
+      nodepath.dirname(file),
+      nodepath.resolve(themeImport.source.value)
+    )
+    ;({ [themeName]: Theme } = addImports(root, themeImport))
   }
   let WithStyles
   if (isTypeScript) {
@@ -93,6 +96,9 @@ export default function addStyles(
       root,
       statement([`import { WithStyles } from '@material-ui/core'`])
     ))
+  }
+  if ((isFlow || isTypeScript) && !Theme) {
+    Theme = 'Theme'
   }
 
   const component = root
@@ -289,4 +295,6 @@ export default function addStyles(
   if (exportNamedDeclaration.size()) {
     exportNamedDeclaration.replaceWith(path => path.node.declaration)
   }
+
+  return root.toSource()
 }

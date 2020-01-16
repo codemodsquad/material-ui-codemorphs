@@ -8,42 +8,31 @@
 
 Smart codemod scripts for day-to-day work with Material UI
 
-# `addStyles(root, options)`
+# `addStyles`
 
-Wraps a functional component with `withStyles`, adds the `const styles = (theme: Theme) => ({ })` declaration,
+A `jscodeshift` transform that wraps a functional component with `withStyles`,
+adds the `const styles = (theme: Theme) => ({ })` declaration,
 and adds a `classes` type annotation and prop destructuring if possible.
 
 Supports Flow, TypeScript, and plain JS. It's freakin great.
 
-## Arguments
+## Special options
 
-### `root: Collection.Collection<Node>`
+### `selectionStart` (_optional_)
 
-The `jscodeshift` `Collection` to modify.
+The start of the selection (e.g. in a text editor) within the source code.
+This is used to determine which component(s) to add styles to. Without this
+option, styles will be added to all components in the file. If `selectionEnd`
+is not given, styles will only be added to the component that contains `selectionStart`.
 
-### `options`
+### `selectionEnd` (_optional_)
 
-#### `options.file` (`string`, **required**)
+The end of the selection (e.g. in a text editor) within the source code.
+This is used to determine which component(s) to add styles to.
 
-The name of the file `root` is parsed from.
+### `themeImport` (_optional_)
 
-#### `selection` (`{start: number, end: number}`, _optional_)
-
-The selection range within the source code, for instance within a text editor in an IDE.
-Determines which component to add styles to if given.
-
-#### `position` (`number`, _optional_)
-
-The cursor position within the source code, for instance within a text editor in an IDE.
-Determines which component to add styles to if given.
-
-#### `Theme` (`{identifier: string, file: string}`, _optional_)
-
-Overrides the default `Theme` import that will be added with
-
-```
-import <identifier> from '<relative path to file>'
-```
+Overrides the `import` statement added by `addStyles` for importing the `Theme` type definition.
 
 ## Flow example
 
@@ -66,12 +55,10 @@ const Consumer = () => <Test text="binding" />
 
 ### Transform
 
-```js
-addStyles(root, {
-  file: 'src/universal/components/Test.js',
-  position: code.indexOf('// position'),
-  Theme: { identifier: 'Theme', file: 'src/universal/theme' },
-})
+```
+jscodeshift path/to/material-ui-codemorphs/addStyles.js src/Test.js \
+  --selectionStart=95 \
+  --themeImport='import {type Theme} from "./src/universal/theme"'
 ```
 
 ### After
@@ -171,7 +158,7 @@ const Bar = () => <Box boxShadow={1} />
 ### Transform
 
 ```
-jscodeshift -t ~/material-ui-codemorphs/setupSystem.js test.js
+jscodeshift -t path/to/material-ui-codemorphs/setupSystem.js test.js
 ```
 
 ### After

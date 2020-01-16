@@ -5,25 +5,34 @@ import jscodeshift from 'jscodeshift'
 import addStyles from '../../src/addStyles'
 import * as path from 'path'
 
+const noop = (): void => {
+  // noop
+}
+
 describe(`addStyles`, function() {
   const fixtures = requireGlob.sync('./fixtures/*.js')
   for (const key in fixtures) {
     const { input, output, parser, file } = fixtures[key]
-    const j = jscodeshift.withParser(parser || 'babylon')
     const position = input.indexOf('// position')
     it(key.replace(/\.js$/, ''), function() {
-      const root = j(input.replace(/^\s*\/\/\s*position.*(\r\n?|\n)/gm, ''))
-      addStyles(root, {
-        file: file || path.join(__dirname, 'test.js'),
-        position,
-        Theme: /\.tsx?$/.test(file)
-          ? null
-          : {
-              file: path.resolve(__dirname, '../../src/universal/theme'),
-              identifier: 'Theme',
-            },
-      })
-      expect(root.toSource().trim()).to.equal(output.trim())
+      const source = input.replace(/^\s*\/\/\s*position.*(\r\n?|\n)/gm, '')
+      const result = addStyles(
+        { path: file || path.join(__dirname, 'test.js'), source },
+        {
+          jscodeshift: jscodeshift.withParser(parser || 'babylon'),
+          stats: noop,
+          report: noop,
+        },
+        {
+          selectionStart: position,
+          selectionEnd: position,
+          themeImport:
+            parser === 'tsx'
+              ? undefined
+              : `import {type Theme} from './src/universal/theme'`,
+        }
+      )
+      expect(result.trim()).to.equal(output.trim())
     })
   }
 })
