@@ -38,7 +38,7 @@ type Filter = (
   paths: Array<ASTPath<Node>>
 ) => boolean
 
-export default function addStyles(
+module.exports = function addStyles(
   fileInfo: { path: string; source: string },
   api: {
     jscodeshift: JSCodeshift

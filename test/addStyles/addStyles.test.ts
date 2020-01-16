@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
+
 import { describe, it } from 'mocha'
 import { expect } from 'chai'
 import requireGlob from 'require-glob'
 import jscodeshift from 'jscodeshift'
-import addStyles from '../../src/addStyles'
+const addStyles = require('../../src/addStyles')
 import * as path from 'path'
 
 const noop = (): void => {
