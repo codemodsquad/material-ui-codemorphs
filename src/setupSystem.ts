@@ -5,7 +5,7 @@ import addImports from 'jscodeshift-add-imports'
 import pipeline from './pipeline'
 import { uniq, map, compact, flatMap } from 'lodash/fp'
 
-function setupMaterialUISystem(
+module.exports = function setupMaterialUISystem(
   { path, source }: { path: string; source: string },
   { jscodeshift: j }: { jscodeshift: JSCodeshift }
 ): string {
@@ -121,6 +121,3 @@ function setupMaterialUISystem(
 
   return root.toSource()
 }
-setupMaterialUISystem.parser = 'babylon'
-
-module.exports = setupMaterialUISystem
