@@ -4,6 +4,30 @@ import { JSCodeshift } from 'jscodeshift'
 import addImports from 'jscodeshift-add-imports'
 import pipeline from './pipeline'
 import { uniq, map, compact, flatMap } from 'lodash/fp'
+import { spawnSync } from 'child_process'
+import * as nodepath from 'path'
+
+const getSystemImports = `
+var system = require('@material-ui/system')
+
+var result = {}
+
+for (var key in system) {
+  var value = system[key]
+  if (value && Array.isArray(value.filterProps)) {
+    value.filterProps.forEach((prop) => {
+      if (
+        !result[prop] ||
+        system[result[prop]].filterProps.length < value.filterProps.length
+      ) {
+        result[prop] = key
+      }
+    })
+  }
+}
+
+console.log(JSON.stringify(result))
+`
 
 module.exports = function setupMaterialUISystem(
   { path, source }: { path: string; source: string },
@@ -12,7 +36,15 @@ module.exports = function setupMaterialUISystem(
   const root = j(source)
   const { statement } = j.template
 
-  const systemImports = require('./systemImports').default(path)
+  // I use this annoying hack because !@#$ Electron or VSCode or something
+  // doesn't let me require @material-ui/system directly from the project
+  // filter
+  const systemImports = JSON.parse(
+    spawnSync('node', ['-e', getSystemImports], {
+      cwd: nodepath.dirname(path),
+      encoding: 'utf8',
+    }).stdout
+  )
 
   const breakpointKeys = new Set(['xs', 'sm', 'md', 'lg', 'xl'])
   let hasBreakpoints = false
