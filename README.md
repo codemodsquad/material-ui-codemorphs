@@ -57,6 +57,7 @@ const Consumer = () => <Test text="binding" />
 
 ```
 jscodeshift path/to/material-ui-codemorphs/addStyles.js src/Test.js \
+  --parser=babylon \
   --selectionStart=95 \
   --themeImport='import {type Theme} from "./src/universal/theme"'
 ```
@@ -106,11 +107,10 @@ const Consumer = () => <Test text="binding" />
 
 ### Transform
 
-```ts
-addStyles(root, {
-  file: 'src/universal/components/Test.ts',
-  position: code.indexOf('// position'),
-})
+```
+jscodeshift path/to/material-ui-codemorphs/addStyles.js src/Test.tsx \
+  --parser=tsx \
+  --selectionStart=95
 ```
 
 ### After
