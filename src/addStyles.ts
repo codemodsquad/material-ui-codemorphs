@@ -5,6 +5,9 @@ import jscodeshift, {
   ASTPath,
   Node,
   JSCodeshift,
+  ExportDefaultDeclaration,
+  FunctionDeclaration,
+  ArrowFunctionExpression,
 } from 'jscodeshift'
 const j = jscodeshift.withParser('babylon')
 const { statement } = j.template
@@ -14,6 +17,13 @@ import pathsInRange from 'jscodeshift-paths-in-range'
 import * as nodepath from 'path'
 import findRoot from 'find-root'
 import * as fs from 'fs'
+import {
+  ExportNamedDeclaration,
+  Statement,
+  Identifier,
+  FunctionExpression,
+} from 'ast-types/gen/nodes'
+import { Collection } from 'jscodeshift/src/Collection'
 
 function shorthandProperty(key: string): ObjectProperty {
   const prop = j.objectProperty(j.identifier(key), j.identifier(key))
@@ -115,23 +125,53 @@ module.exports = function addStyles(
     Theme = 'Theme'
   }
 
-  const component = root
+  const arrowFunction = root
     .find(j.ArrowFunctionExpression)
     .filter(filter)
     .at(0)
-  const variableDeclarator = component.closest(j.VariableDeclarator)
-  const variableDeclaration = component.closest(j.VariableDeclaration)
-  const exportNamedDeclaration = component.closest(j.ExportNamedDeclaration)
-  const declaration = exportNamedDeclaration.size()
-    ? exportNamedDeclaration
-    : variableDeclaration.size()
-    ? variableDeclaration
-    : j([])
+  const functionExpression = root
+    .find(j.FunctionExpression)
+    .filter(filter)
+    .at(0)
+  const functionDeclaration = root
+    .find(j.FunctionDeclaration)
+    .filter(filter)
+    .at(0)
 
-  if (!variableDeclarator.size())
-    throw new Error(`failed to find variable declarator`)
+  const variableDeclarator = (arrowFunction.size()
+    ? arrowFunction
+    : functionExpression
+  ).closest(j.VariableDeclarator)
 
-  const componentNameNode = variableDeclarator.nodes()[0].id
+  let component:
+    | Collection<ArrowFunctionExpression>
+    | Collection<FunctionExpression>
+    | Collection<FunctionDeclaration>
+  let componentNameNode: Identifier
+
+  if (variableDeclarator.size()) {
+    component = arrowFunction.size() ? arrowFunction : functionExpression
+    const identifier = variableDeclarator.nodes()[0].id
+    if (identifier.type !== 'Identifier') {
+      throw new Error(
+        `expected component variable declarator to assign to an id prop`
+      )
+    }
+    componentNameNode = identifier
+  } else {
+    if (!functionDeclaration.size()) {
+      throw new Error(`failed to find a function or arrow function component to add styles to.
+try positioning the cursor inside the component.`)
+    }
+
+    component = functionDeclaration
+    const identifier = functionDeclaration.nodes()[0].id
+    if (identifier.type !== 'Identifier') {
+      throw new Error(`expected function id to be an identifier`)
+    }
+    componentNameNode = identifier
+  }
+
   if (componentNameNode.type !== 'Identifier')
     throw new Error(
       `expected component variable declarator to assign to an id prop`
@@ -167,11 +207,20 @@ module.exports = function addStyles(
     }
   }
 
+  let declaration:
+    | Collection<Statement>
+    | Collection<ExportNamedDeclaration>
+    | Collection<ExportDefaultDeclaration> = component.closest(j.Statement)
+  const exportNamedDeclaration = component.closest(j.ExportNamedDeclaration)
+  const exportDefaultDeclaration = component.closest(j.ExportDefaultDeclaration)
+  if (exportNamedDeclaration.size()) declaration = exportNamedDeclaration
+  if (exportDefaultDeclaration.size()) declaration = exportDefaultDeclaration
+
+  let afterStyles: Collection<any> = declaration // eslint-disable-line @typescript-eslint/no-explicit-any
+
   const styles = declaration.paths()[0].scope.lookup('styles')
     ? `${lowerFirst(componentName)}Styles`
     : 'styles'
-
-  let afterStyles = declaration
 
   if (isFlow) {
     if (
@@ -278,6 +327,9 @@ module.exports = function addStyles(
   if (exportNamedDeclaration.size()) {
     declaration.insertAfter(`export { ${componentName} }`)
   }
+  if (exportDefaultDeclaration.size()) {
+    declaration.insertAfter(`export default ${componentName}`)
+  }
 
   declaration.insertAfter(
     statement([
@@ -287,6 +339,9 @@ module.exports = function addStyles(
 
   if (exportNamedDeclaration.size()) {
     exportNamedDeclaration.replaceWith(path => path.node.declaration)
+  }
+  if (exportDefaultDeclaration.size()) {
+    exportDefaultDeclaration.replaceWith(path => path.node.declaration)
   }
 
   return root.toSource()
