@@ -152,9 +152,9 @@ module.exports = function addStyles(
   if (variableDeclarator.size()) {
     component = arrowFunction.size() ? arrowFunction : functionExpression
     const identifier = variableDeclarator.nodes()[0].id
-    if (identifier.type !== 'Identifier') {
+    if (!identifier || identifier.type !== 'Identifier') {
       throw new Error(
-        `expected component variable declarator to assign to an id prop`
+        `expected component variable declarator to assign to an identifier`
       )
     }
     componentNameNode = identifier
@@ -166,16 +166,12 @@ try positioning the cursor inside the component.`)
 
     component = functionDeclaration
     const identifier = functionDeclaration.nodes()[0].id
-    if (identifier.type !== 'Identifier') {
-      throw new Error(`expected function id to be an identifier`)
+    if (!identifier || identifier.type !== 'Identifier') {
+      throw new Error(`function name must be an identifier`)
     }
     componentNameNode = identifier
   }
 
-  if (componentNameNode.type !== 'Identifier')
-    throw new Error(
-      `expected component variable declarator to assign to an id prop`
-    )
   const componentName = componentNameNode.name
   const componentNameWithStyles = `${componentName}WithStyles`
 
