@@ -125,9 +125,7 @@ jscodeshift path/to/material-ui-codemorphs/addStyles.js src/Test.tsx \
 ```tsx
 import * as React from 'react'
 
-import { withStyles } from '@material-ui/core/styles'
-import { Theme } from '@material-ui/core/styles/createMuiTheme'
-import { WithStyles } from '@material-ui/core'
+import { withStyles, Theme, WithStyles } from '@material-ui/core/styles'
 
 interface Props extends WithStyles<typeof styles> {
   text: string

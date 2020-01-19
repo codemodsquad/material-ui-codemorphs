@@ -111,14 +111,12 @@ module.exports = function addStyles(
     if (!Theme) {
       ;({ Theme } = addImports(
         root,
-        statement([
-          `import { Theme } from '@material-ui/core/styles/createMuiTheme'`,
-        ])
+        statement([`import { Theme } from '@material-ui/core/styles'`])
       ))
     }
     ;({ WithStyles } = addImports(
       root,
-      statement([`import { WithStyles } from '@material-ui/core'`])
+      statement([`import { WithStyles } from '@material-ui/core/styles'`])
     ))
   }
   if ((isFlow || isTypeScript) && !Theme) {
