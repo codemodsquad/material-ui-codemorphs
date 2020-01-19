@@ -54,12 +54,10 @@ type Props = {
   +text: string,
 }
 
-const Test = ({ text }: Props): React.Node => (
+export const Test = ({ text }: Props): React.Node => (
   // position
   <div>{text}</div>
 )
-
-const Consumer = () => <Test text="binding" />
 ```
 
 ### Transform
@@ -88,11 +86,13 @@ type Props = {
   +classes: Classes<typeof styles>,
 }
 
-const Test = ({ text, classes }: Props): React.Node => <div>{text}</div>
+const TestWithStyles = ({ text, classes }: Props): React.Node => (
+  <div>{text}</div>
+)
 
-const TestWithStyles = withStyles(styles)(Test)
+const Test = withStyles(styles)(TestWithStyles)
 
-const Consumer = () => <TestWithStyles text="binding" />
+export { Test }
 ```
 
 ## TypeScript example
@@ -106,12 +106,10 @@ interface Props {
   text: string
 }
 
-const Test = ({ text }: Props): React.ReactNode => (
+export const Test = ({ text }: Props): React.ReactNode => (
   // position
   <div>{text}</div>
 )
-
-const Consumer = () => <Test text="binding" />
 ```
 
 ### Transform
@@ -137,11 +135,13 @@ interface Props extends WithStyles<typeof styles> {
 
 const styles = (theme: Theme) => ({})
 
-const Test = ({ text, classes }: Props): React.ReactNode => <div>{text}</div>
+const TestWithStyles = ({ text, classes }: Props): React.ReactNode => (
+  <div>{text}</div>
+)
 
-const TestWithStyles = withStyles(styles)(Test)
+const Test = withStyles(styles)(TestWithStyles)
 
-const Consumer = () => <TestWithStyles text="binding" />
+export { Test }
 ```
 
 # `setupSystem`

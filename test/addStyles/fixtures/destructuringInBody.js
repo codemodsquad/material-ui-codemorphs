@@ -13,7 +13,7 @@ const styles = theme => ({
 
 })
 
-const Test = (props) => {
+const TestWithStyles = (props) => {
   const {
     text,
     classes
@@ -21,5 +21,5 @@ const Test = (props) => {
   return <div>{text}</div>
 }
 
-const TestWithStyles = withStyles(styles)(Test)
+const Test = withStyles(styles)(TestWithStyles)
 `

@@ -17,14 +17,14 @@ const testStyles = (theme: Theme) => ({
 
 })
 
-const Test = ({
+const TestWithStyles = ({
   text,
   classes
 }) => (
   <div>{text}</div>
 )
 
-const TestWithStyles = withStyles(testStyles)(Test)
+const Test = withStyles(testStyles)(TestWithStyles)
 `
 
 export const parser = 'tsx'

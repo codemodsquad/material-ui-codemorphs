@@ -142,6 +142,8 @@ module.exports = function addStyles(
   const componentScope = component.paths()[0].scope.lookup(componentName)
   const componentNode = component.nodes()[0]
 
+  componentNameNode.name = componentNameWithStyles
+
   const propsParam = componentNode.params[0]
   if (propsParam && propsParam.type === 'ObjectPattern') {
     addPropertyBeforeRestElement(propsParam, shorthandProperty('classes'))
@@ -164,27 +166,6 @@ module.exports = function addStyles(
       )
     }
   }
-
-  root.find(j.Identifier, { name: componentName }).forEach(path => {
-    if (path.node === componentNameNode) return
-    if (path.scope.lookup(componentName) === componentScope) {
-      if (path.parent.node.type === 'ExportSpecifier') {
-        path.parent.replace(
-          j.exportSpecifier(
-            j.identifier(componentNameWithStyles),
-            j.identifier(componentName)
-          )
-        )
-      } else {
-        path.replace(j.identifier(componentNameWithStyles))
-      }
-    }
-  })
-  root.find(j.JSXIdentifier, { name: componentName }).forEach(path => {
-    if (path.scope.lookup(componentName) === componentScope) {
-      path.replace(j.jsxIdentifier(componentNameWithStyles))
-    }
-  })
 
   const styles = declaration.paths()[0].scope.lookup('styles')
     ? `${lowerFirst(componentName)}Styles`
@@ -295,14 +276,12 @@ module.exports = function addStyles(
     ])
   )
   if (exportNamedDeclaration.size()) {
-    declaration.insertAfter(
-      `export { ${componentName}WithStyles as ${componentName} }`
-    )
+    declaration.insertAfter(`export { ${componentName} }`)
   }
 
   declaration.insertAfter(
     statement([
-      `\n\nconst ${componentName}WithStyles = ${withStyles}(${styles})(${componentName})\n\n`,
+      `\n\nconst ${componentName} = ${withStyles}(${styles})(${componentNameWithStyles})\n\n`,
     ])
   )
 

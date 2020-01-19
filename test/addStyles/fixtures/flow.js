@@ -28,12 +28,12 @@ type Props = {
   +classes: Classes<typeof styles>,
 };
 
-const Test = ({
+const TestWithStyles = ({
   text,
   classes
 }: Props): React.Node => (
   <div>{text}</div>
 )
 
-const TestWithStyles = withStyles(styles)(Test)
+const Test = withStyles(styles)(TestWithStyles)
 `

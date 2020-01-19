@@ -26,14 +26,14 @@ const styles = (theme: Theme) => ({
 
 })
 
-const Test = ({
+const TestWithStyles = ({
   text,
   classes
 }: Props): React.ReactNode => (
   <div>{text}</div>
 )
 
-const TestWithStyles = withStyles(styles)(Test)
+const Test = withStyles(styles)(TestWithStyles)
 `
 
 export const parser = 'tsx'

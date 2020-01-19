@@ -35,14 +35,14 @@ const styles = (theme: Theme) => ({
 
 export type Props = { +classes: Classes<typeof styles> }
 
-const Temp = ({
+const TempWithStyles = ({
  text,
  classes
 }: Props): React.Node => (
   <div />
 )
 
-const TempWithStyles = withStyles(styles)(Temp)
+const Temp = withStyles(styles)(TempWithStyles)
 
-export default TempWithStyles;
+export default Temp
 `

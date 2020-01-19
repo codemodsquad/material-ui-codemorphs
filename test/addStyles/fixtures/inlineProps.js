@@ -19,7 +19,7 @@ const styles = (theme: Theme) => ({
 
 })
 
-const Test = ({
+const TestWithStyles = ({
   text,
   classes
 }: {
@@ -29,5 +29,5 @@ const Test = ({
   <div>{text}</div>
 );
 
-const TestWithStyles = withStyles(styles)(Test)
+const Test = withStyles(styles)(TestWithStyles)
 `
