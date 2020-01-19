@@ -221,7 +221,8 @@ try positioning the cursor inside the component.`)
   if (isFlow) {
     if (
       propsParam &&
-      propsParam.type === 'ObjectPattern' &&
+      (propsParam.type === 'ObjectPattern' ||
+        propsParam.type === 'Identifier') &&
       propsParam.typeAnnotation
     ) {
       const { typeAnnotation } = propsParam.typeAnnotation
