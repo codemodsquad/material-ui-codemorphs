@@ -33,6 +33,15 @@ This is used to determine which component(s) to add styles to.
 ### `themeImport` (_optional_)
 
 Overrides the `import` statement added by `addStyles` for importing the `Theme` type definition.
+You can also configure this by adding the following to your `package.json`:
+
+```json
+{
+  "material-ui-codemorphs": {
+    "themeImport": "import { type Theme } from './src/universal/theme'"
+  }
+}
+```
 
 ## Flow example
 

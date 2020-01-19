@@ -12,6 +12,8 @@ import { lowerFirst } from 'lodash'
 import hasFlowAnnotation from './hasFlowAnnotation'
 import pathsInRange from 'jscodeshift-paths-in-range'
 import * as nodepath from 'path'
+import findRoot from 'find-root'
+import * as fs from 'fs'
 
 function shorthandProperty(key: string): ObjectProperty {
   const prop = j.objectProperty(j.identifier(key), j.identifier(key))
@@ -73,14 +75,26 @@ module.exports = function addStyles(
     statement`import { withStyles } from '@material-ui/core/styles'`
   )
   let Theme
-  if (options.themeImport && (isFlow || isTypeScript)) {
-    const themeImport = statement([options.themeImport])
-    const themeName = themeImport.specifiers[0].local.name
-    themeImport.source.value = nodepath.relative(
-      nodepath.dirname(file),
-      nodepath.resolve(themeImport.source.value)
-    )
-    ;({ [themeName]: Theme } = addImports(root, themeImport))
+  if (isFlow || isTypeScript) {
+    let { themeImport } = options
+    if (!themeImport) {
+      const pkgJsonPath = nodepath.join(findRoot(file), 'package.json')
+      const { ['material-ui-codemorphs']: pkgOptions } = JSON.parse(
+        fs.readFileSync(pkgJsonPath, 'utf8')
+      )
+      if (pkgOptions) ({ themeImport } = pkgOptions)
+    }
+    if (themeImport) {
+      const parsed = statement([themeImport])
+      const themeName = parsed.specifiers[0].local.name
+      if (parsed.source.value.startsWith('.')) {
+        parsed.source.value = nodepath.relative(
+          nodepath.dirname(file),
+          nodepath.resolve(findRoot(file), parsed.source.value)
+        )
+      }
+      ;({ [themeName]: Theme } = addImports(root, parsed))
+    }
   }
   let WithStyles
   if (isTypeScript) {
