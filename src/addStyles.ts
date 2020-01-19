@@ -276,7 +276,8 @@ try positioning the cursor inside the component.`)
   if (isTypeScript) {
     if (
       propsParam &&
-      propsParam.type === 'ObjectPattern' &&
+      (propsParam.type === 'ObjectPattern' ||
+        propsParam.type === 'Identifier') &&
       propsParam.typeAnnotation
     ) {
       const { typeAnnotation } = propsParam.typeAnnotation
