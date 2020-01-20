@@ -1,5 +1,5 @@
 import addImports from 'jscodeshift-add-imports'
-import jscodeshift, {
+import {
   ObjectProperty,
   ObjectPattern,
   ASTPath,
@@ -9,8 +9,6 @@ import jscodeshift, {
   FunctionDeclaration,
   ArrowFunctionExpression,
 } from 'jscodeshift'
-const j = jscodeshift.withParser('babylon')
-const { statement } = j.template
 import { lowerFirst } from 'lodash'
 import hasFlowAnnotation from './hasFlowAnnotation'
 import pathsInRange from 'jscodeshift-paths-in-range'
@@ -24,25 +22,6 @@ import {
   FunctionExpression,
 } from 'ast-types/gen/nodes'
 import { Collection } from 'jscodeshift/src/Collection'
-
-function shorthandProperty(key: string): ObjectProperty {
-  const prop = j.objectProperty(j.identifier(key), j.identifier(key))
-  prop.shorthand = true
-  return prop
-}
-
-function addPropertyBeforeRestElement(
-  pattern: ObjectPattern,
-  property: ObjectProperty
-): void {
-  const props = pattern.properties
-  const l = props.length
-  if ((props[l - 1].type as string) === 'RestElement') {
-    props.splice(l - 1, 0, property)
-  } else {
-    props.push(property)
-  }
-}
 
 type Filter = (
   path: ASTPath<Node>,
@@ -64,8 +43,30 @@ module.exports = function addStyles(
   }
 ): string {
   const j = api.jscodeshift
+
+  const shorthandProperty = (key: string): ObjectProperty => {
+    const prop = j.objectProperty(j.identifier(key), j.identifier(key))
+    prop.shorthand = true
+    return prop
+  }
+
+  const addPropertyBeforeRestElement = (
+    pattern: ObjectPattern,
+    property: ObjectProperty
+  ): void => {
+    const props = pattern.properties
+    const l = props.length
+    if ((props[l - 1].type as string) === 'RestElement') {
+      props.splice(l - 1, 0, property)
+    } else {
+      props.push(property)
+    }
+  }
+
+  const { statement } = j.template
   const file = fileInfo.path
   const root = j(fileInfo.source)
+
   let filter: Filter
   if (options.selectionStart) {
     const selectionStart = parseInt(options.selectionStart)
@@ -321,10 +322,10 @@ try positioning the cursor inside the component.`)
     ])
   )
   if (exportNamedDeclaration.size()) {
-    declaration.insertAfter(`export { ${componentName} }`)
+    declaration.insertAfter(statement([`export { ${componentName} }`]))
   }
   if (exportDefaultDeclaration.size()) {
-    declaration.insertAfter(`export default ${componentName}`)
+    declaration.insertAfter(statement([`export default ${componentName}`]))
   }
 
   declaration.insertAfter(
