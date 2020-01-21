@@ -110,6 +110,7 @@ module.exports = function addStyles(
       case 'FunctionDeclaration':
       case 'FunctionExpression':
       case 'ArrowFunctionExpression': {
+        if (!node.params[0]) return undefined
         const { typeAnnotation } = node.params[0] as {
           typeAnnotation?: TypeAnnotation | TSTypeAnnotation
         }
@@ -278,9 +279,13 @@ try positioning the cursor inside a component.`)
 
   let declaration:
     | Collection<Statement>
+    | Collection<ArrowFunctionExpression>
+    | Collection<FunctionExpression>
+    | Collection<FunctionDeclaration>
     | Collection<ClassDeclaration>
     | Collection<ExportNamedDeclaration>
     | Collection<ExportDefaultDeclaration> = component.closest(j.Statement)
+  if (!declaration.size()) declaration = component
   const exportNamedDeclaration = component.closest(j.ExportNamedDeclaration)
   const exportDefaultDeclaration = component.closest(j.ExportDefaultDeclaration)
   if (classDeclaration.size()) declaration = classDeclaration
