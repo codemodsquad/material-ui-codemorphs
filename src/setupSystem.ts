@@ -3,33 +3,58 @@
 import { JSCodeshift } from 'jscodeshift'
 import addImports from 'jscodeshift-add-imports'
 import pipeline from './util/pipeline'
+import { execFileSync } from 'child_process'
 import { uniq, map, compact, flatMap } from 'lodash/fp'
 import * as nodepath from 'path'
-import resolve from 'resolve'
+import pkgConf from 'pkg-conf'
+import { memoize } from 'lodash'
 
-function getSystemImports(file: string): Record<string, string> {
-  /* eslint-disable @typescript-eslint/no-var-requires */
-  const system = require(resolve.sync('@material-ui/system', {
-    basedir: nodepath.dirname(file),
-  }))
-  /* eslint-enable @typescript-eslint/no-var-requires */
-  const result: Record<string, string> = {}
+const getSystem = `
+var system = require('@material-ui/system')
 
-  for (const key in system) {
-    const value = system[key]
-    if (value && Array.isArray(value.filterProps)) {
-      value.filterProps.forEach((prop: string) => {
-        if (
-          !result[prop] ||
-          system[result[prop]].filterProps.length < value.filterProps.length
-        ) {
-          result[prop] = key
-        }
-      })
-    }
+var result = {}
+
+for (var key in system) {
+  var value = system[key]
+  if (value && Array.isArray(value.filterProps)) {
+    value.filterProps.forEach((prop) => {
+      if (
+        !result[prop] ||
+        system[result[prop]].filterProps.length < value.filterProps.length
+      ) {
+        result[prop] = key
+      }
+    })
   }
-  return result
 }
+
+console.log(JSON.stringify(result))
+`
+
+const findRoot = (file: string): string => {
+  const conf = pkgConf.sync('version', { cwd: nodepath.dirname(file) })
+  const filepath = pkgConf.filepath(conf)
+  if (!filepath) throw new Error(`failed to get root path for ${file}`)
+  return nodepath.dirname(filepath)
+}
+
+const getSystemImports = memoize(
+  (cwd: string): Record<string, string> => {
+    const babelNode = nodepath.join(
+      findRoot(__filename),
+      'node_modules',
+      '.bin',
+      'babel-node'
+    )
+
+    const out = execFileSync(babelNode, ['-e', getSystem], {
+      cwd,
+      encoding: 'utf8',
+    })
+
+    return JSON.parse(out)
+  }
+)
 
 module.exports = function setupMaterialUISystem(
   { path, source }: { path: string; source: string },
@@ -38,7 +63,7 @@ module.exports = function setupMaterialUISystem(
   const root = j(source)
   const { statement } = j.template
 
-  const systemImports = getSystemImports(path)
+  const systemImports = getSystemImports(findRoot(path))
 
   const breakpointKeys = new Set(['xs', 'sm', 'md', 'lg', 'xl'])
   let hasBreakpoints = false
