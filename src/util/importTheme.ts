@@ -4,6 +4,7 @@ import hasFlowAnnotation from './hasFlowAnnotation'
 import pkgConf from 'pkg-conf'
 import * as path from 'path'
 import addImports from 'jscodeshift-add-imports'
+import getStylesPackage from './getStylesPackage'
 
 export default function importTheme(options: {
   root: Collection<any> // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -26,7 +27,7 @@ export default function importTheme(options: {
       {
         cwd: path.dirname(file),
         defaults: {
-          themeImport: `import { Theme } from '@material-ui/core/styles'`,
+          themeImport: `import { Theme } from '${getStylesPackage(file)}'`,
         },
         skipOnFalse: true,
       }
@@ -45,14 +46,6 @@ export default function importTheme(options: {
         )
       }
       ;({ [themeName]: Theme } = addImports(root, parsed))
-    }
-  }
-  if (isTypeScript) {
-    if (!Theme) {
-      ;({ Theme } = addImports(
-        root,
-        statement([`import { Theme } from '@material-ui/core/styles'`])
-      ))
     }
   }
 

@@ -4,14 +4,14 @@ import { describe, it } from 'mocha'
 import { expect } from 'chai'
 import requireGlob from 'require-glob'
 import jscodeshift from 'jscodeshift'
-const addStyles = require('../../src/addStyles')
+const withStyles = require('../../src/withStyles')
 import * as path from 'path'
 
 const noop = (): void => {
   // noop
 }
 
-describe(`addStyles`, function() {
+describe(`withStyles`, function() {
   describe(`typescript, with config in package.json`, function() {
     const fixtures = requireGlob.sync(
       './fixtures/typescriptPackageJson/src/components/*.js'
@@ -21,7 +21,7 @@ describe(`addStyles`, function() {
       const position = input.indexOf('// position')
       it(key.replace(/\.js$/, ''), function() {
         const source = input.replace(/^\s*\/\/\s*position.*(\r\n?|\n)/gm, '')
-        const result = addStyles(
+        const result = withStyles(
           {
             path: path.join(
               __dirname,

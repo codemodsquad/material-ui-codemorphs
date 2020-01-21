@@ -24,6 +24,7 @@ import addClassesToPropsType from './util/addClassesToPropsType'
 import shorthandProperty from './util/shorthandProperty'
 import isReactComponentClass from './util/isReactComponentClass'
 import addPropertyBeforeRestElement from './util/addPropertyBeforeRestElement'
+import getStylesPackage from './util/getStylesPackage'
 
 type Filter = (
   path: ASTPath<Node>,
@@ -64,7 +65,9 @@ module.exports = function addStyles(
 
   const { withStyles } = addImports(
     root,
-    statement`import { withStyles } from '@material-ui/core/styles'`
+    statement([
+      `import { withStyles } from '${getStylesPackage(fileInfo.path)}';`,
+    ])
   )
   const Theme = importTheme({
     root,

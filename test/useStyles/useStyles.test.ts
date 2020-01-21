@@ -4,21 +4,21 @@ import { describe, it } from 'mocha'
 import { expect } from 'chai'
 import requireGlob from 'require-glob'
 import jscodeshift from 'jscodeshift'
-const withStyles = require('../../src/withStyles')
+const useStyles = require('../../src/useStyles')
 import * as path from 'path'
 
 const noop = (): void => {
   // noop
 }
 
-describe(`withStyles`, function() {
+describe(`useStyles`, function() {
   const fixtures = requireGlob.sync('./fixtures/*.js')
   for (const key in fixtures) {
     const { input, output, parser, file } = fixtures[key]
     const position = input.indexOf('// position')
     it(key.replace(/\.js$/, ''), function() {
       const source = input.replace(/^\s*\/\/\s*position.*(\r\n?|\n)/gm, '')
-      const result = withStyles(
+      const result = useStyles(
         { path: file || path.join(__dirname, 'test.js'), source },
         {
           jscodeshift: jscodeshift.withParser(parser || 'babylon'),

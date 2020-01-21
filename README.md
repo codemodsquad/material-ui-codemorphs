@@ -8,6 +8,134 @@
 
 Smart codemod scripts for day-to-day work with Material UI
 
+# Table of Contents
+
+<!-- toc -->
+
+- [`useStyles`](#usestyles)
+  - [Special options](#special-options)
+  - [Flow Example](#flow-example)
+  - [TypeScript example](#typescript-example)
+- [`withStyles`](#withstyles)
+  - [Special options](#special-options-1)
+  - [Flow example](#flow-example)
+  - [TypeScript example](#typescript-example-1)
+- [`setupSystem`](#setupsystem)
+  - [Example](#example)
+
+<!-- tocstop -->
+
+# `useStyles`
+
+A `jscodeshift` transform that adds a `makeStyles` declaration and `useStyles`
+hook to a function component.
+
+Supports Flow, TypeScript, and plain JS. It's freakin great.
+
+## Special options
+
+### `selectionStart` (_optional_)
+
+The start of the selection (e.g. in a text editor) within the source code.
+This is used to determine which component(s) to add styles to. Without this
+option, styles will be added to all components in the file. If `selectionEnd`
+is not given, styles will only be added to the component that contains `selectionStart`.
+
+### `selectionEnd` (_optional_)
+
+The end of the selection (e.g. in a text editor) within the source code.
+This is used to determine which component(s) to add styles to.
+
+### `themeImport` (_optional_)
+
+Overrides the `import` statement added by `useStyles` for importing the `Theme` type definition.
+You can also configure this by adding the following to your `package.json`:
+
+```json
+{
+  "material-ui-codemorphs": {
+    "themeImport": "import { type Theme } from './src/universal/theme'"
+  }
+}
+```
+
+## Flow Example
+
+### Before
+
+```js
+// @flow
+
+import * as React from 'react'
+
+const Test = ({ text }) => (
+  // position
+  <div>{text}</div>
+)
+```
+
+### Transform
+
+```
+jscodeshift path/to/material-ui-codemorphs/useStyles.js src/Test.js \
+  --parser=babylon \
+  --selectionStart=95
+```
+
+### After
+
+```js
+// @flow
+
+import * as React from 'react'
+
+import { makeStyles } from '@material-ui/core/styles'
+import { type Theme } from '../../src/universal/theme'
+
+const useStyles = makeStyles((theme: Theme) => ({}))
+
+const Test = ({ text }) => {
+  const classes = useStyles()
+  return <div>{text}</div>
+}
+```
+
+## TypeScript example
+
+### Before
+
+```ts
+import * as React from 'react'
+
+const Test = ({ text }) => (
+  // position
+  <div>{text}</div>
+)
+```
+
+### Transform
+
+```
+jscodeshift path/to/material-ui-codemorphs/useStyles.js src/Test.tsx \
+  --parser=tsx \
+  --selectionStart=95
+```
+
+### After
+
+```ts
+import * as React from 'react'
+
+import { makeStyles, Theme } from '@material-ui/core/styles'
+
+const useStyles = makeStyles((theme: Theme) => ({}))
+
+const Test = ({ text }) => {
+  const classes = useStyles()
+  return <div>{text}</div>
+}
+```
+
 # `withStyles`
 
 A `jscodeshift` transform that wraps a component with `withStyles`,
@@ -32,7 +160,7 @@ This is used to determine which component(s) to add styles to.
 
 ### `themeImport` (_optional_)
 
-Overrides the `import` statement added by `addStyles` for importing the `Theme` type definition.
+Overrides the `import` statement added by `withStyles` for importing the `Theme` type definition.
 You can also configure this by adding the following to your `package.json`:
 
 ```json
@@ -63,7 +191,7 @@ export const Test = ({ text }: Props): React.Node => (
 ### Transform
 
 ```
-jscodeshift path/to/material-ui-codemorphs/addStyles.js src/Test.js \
+jscodeshift path/to/material-ui-codemorphs/withStyles.js src/Test.js \
   --parser=babylon \
   --selectionStart=95 \
   --themeImport='import {type Theme} from "./src/universal/theme"'
@@ -115,7 +243,7 @@ export const Test = ({ text }: Props): React.ReactNode => (
 ### Transform
 
 ```
-jscodeshift path/to/material-ui-codemorphs/addStyles.js src/Test.tsx \
+jscodeshift path/to/material-ui-codemorphs/withStyles.js src/Test.tsx \
   --parser=tsx \
   --selectionStart=95
 ```
