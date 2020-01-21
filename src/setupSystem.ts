@@ -2,21 +2,16 @@
 
 import { JSCodeshift } from 'jscodeshift'
 import addImports from 'jscodeshift-add-imports'
-import pipeline from './pipeline'
+import pipeline from './util/pipeline'
 import { uniq, map, compact, flatMap } from 'lodash/fp'
 import * as nodepath from 'path'
-import findRoot from 'find-root'
+import resolve from 'resolve'
 
 function getSystemImports(file: string): Record<string, string> {
-  const rootDir = findRoot(file)
-
   /* eslint-disable @typescript-eslint/no-var-requires */
-  const system = require(nodepath.resolve(
-    rootDir,
-    'node_modules',
-    '@material-ui',
-    'system'
-  ))
+  const system = require(resolve.sync('@material-ui/system', {
+    basedir: nodepath.dirname(file),
+  }))
   /* eslint-enable @typescript-eslint/no-var-requires */
   const result: Record<string, string> = {}
 

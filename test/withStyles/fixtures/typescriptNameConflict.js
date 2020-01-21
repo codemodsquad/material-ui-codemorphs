@@ -8,7 +8,7 @@ const Test = ({text}) => (
 `
 
 export const output = `
-import { withStyles, Theme, WithStyles } from "@material-ui/core/styles";
+import { withStyles, Theme } from "@material-ui/core/styles";
 const styles = {}
 
 const testStyles = (theme: Theme) => ({

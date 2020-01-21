@@ -11,7 +11,7 @@ const noop = (): void => {
   // noop
 }
 
-describe(`addStyles`, function() {
+describe(`withStyles`, function() {
   const fixtures = requireGlob.sync('./fixtures/*.js')
   for (const key in fixtures) {
     const { input, output, parser, file } = fixtures[key]

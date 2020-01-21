@@ -17,13 +17,13 @@ import * as React from 'react'
 import { withStyles, WithStyles } from "@material-ui/core/styles";
 import { Theme } from "../theme";
 
-interface Props extends WithStyles<typeof styles> {
-  text: string
-}
-
 const styles = (theme: Theme) => ({
 
 })
+
+interface Props extends WithStyles<typeof styles> {
+  text: string
+}
 
 const TestWithStyles = ({
   text,

@@ -8,7 +8,7 @@
 
 Smart codemod scripts for day-to-day work with Material UI
 
-# `addStyles`
+# `withStyles`
 
 A `jscodeshift` transform that wraps a component with `withStyles`,
 adds the `const styles = (theme: Theme) => ({ })` declaration,

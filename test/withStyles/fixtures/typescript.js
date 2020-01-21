@@ -5,10 +5,10 @@ interface Props {
   text: string
 }
 
-const Test = React.forwardRef(({text}: Props, ref): React.ReactNode => (
+const Test = ({text}: Props): React.ReactNode => (
   // position
-  <div ref={ref}>{text}</div>
-))
+  <div>{text}</div>
+)
 `
 
 export const output = `
@@ -16,20 +16,20 @@ import * as React from 'react'
 
 import { withStyles, Theme, WithStyles } from "@material-ui/core/styles";
 
-interface Props extends WithStyles<typeof styles> {
-  text: string
-}
-
 const styles = (theme: Theme) => ({
 
 })
 
-const TestWithStyles = React.forwardRef(({
+interface Props extends WithStyles<typeof styles> {
+  text: string
+}
+
+const TestWithStyles = ({
   text,
   classes
-}: Props, ref): React.ReactNode => (
-  <div ref={ref}>{text}</div>
-))
+}: Props): React.ReactNode => (
+  <div>{text}</div>
+)
 
 const Test = withStyles(styles)(TestWithStyles)
 `

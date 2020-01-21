@@ -5,11 +5,14 @@ interface Props {
   text: string
 }
 
-export default function Test({text}: Props): React.ReactNode {
-  // position
-  return (
-    <div>{text}</div>
-  )
+export default class Test extends React.Component<Props> {
+  render() {
+    const {text} = this.props
+    // position
+    return (
+      <div>{text}</div>
+    )
+  }
 }
 `
 
@@ -18,23 +21,21 @@ import * as React from 'react'
 
 import { withStyles, Theme, WithStyles } from "@material-ui/core/styles";
 
-interface Props extends WithStyles<typeof styles> {
-  text: string
-}
-
 const styles = (theme: Theme) => ({
 
 })
 
-function TestWithStyles(
-  {
-    text,
-    classes
-  }: Props
-): React.ReactNode {
-  return (
-    <div>{text}</div>
-  )
+interface Props extends WithStyles<typeof styles> {
+  text: string
+}
+
+class TestWithStyles extends React.Component<Props> {
+  render() {
+    const {text} = this.props
+    return (
+      <div>{text}</div>
+    )
+  }
 }
 
 const Test = withStyles(styles)(TestWithStyles)
