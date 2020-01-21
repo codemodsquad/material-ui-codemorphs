@@ -43,5 +43,5 @@ function TestWithStyles(
 
 const Test = withStyles(styles)(TestWithStyles)
 
-export default Test
+export default Test;
 `

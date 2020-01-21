@@ -21,5 +21,5 @@ const TestWithStyles = ({
 
 const Test = withStyles(styles)(TestWithStyles)
 
-export { Test }
+export { Test };
 `

@@ -322,10 +322,19 @@ try positioning the cursor inside the component.`)
     ])
   )
   if (exportNamedDeclaration.size()) {
-    declaration.insertAfter(statement([`export { ${componentName} }`]))
+    declaration.insertAfter(
+      j.exportNamedDeclaration(null, [
+        j.exportSpecifier(
+          j.identifier(componentName),
+          j.identifier(componentName)
+        ),
+      ])
+    )
   }
   if (exportDefaultDeclaration.size()) {
-    declaration.insertAfter(statement([`export default ${componentName}`]))
+    declaration.insertAfter(
+      j.exportDefaultDeclaration(j.identifier(componentName))
+    )
   }
 
   declaration.insertAfter(

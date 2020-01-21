@@ -39,7 +39,7 @@ function TestWithStyles(props: Props): React.ReactNode {
 
 const Test = withStyles(styles)(TestWithStyles)
 
-export default Test
+export default Test;
 `
 
 export const parser = 'tsx'
