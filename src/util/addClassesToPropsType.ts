@@ -18,7 +18,7 @@ import hasFlowAnnotation from './hasFlowAnnotation'
 
 export default function addClassesToPropsType(options: {
   j: JSCodeshift
-  root: Collection<any>
+  root: Collection<any> // eslint-disable-line @typescript-eslint/no-explicit-any
   path:
     | ASTPath<FlowTypeKind>
     | ASTPath<TSTypeKind>

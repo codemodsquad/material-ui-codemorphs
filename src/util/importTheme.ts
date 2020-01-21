@@ -6,7 +6,7 @@ import * as path from 'path'
 import addImports from 'jscodeshift-add-imports'
 
 export default function importTheme(options: {
-  root: Collection<any>
+  root: Collection<any> // eslint-disable-line @typescript-eslint/no-explicit-any
   jscodeshift: JSCodeshift
   file: string
   themeImport: string | undefined

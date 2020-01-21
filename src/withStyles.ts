@@ -14,7 +14,6 @@ import {
   FunctionExpression,
 } from 'jscodeshift'
 import { Collection } from 'jscodeshift/src/Collection'
-
 import { lowerFirst } from 'lodash'
 import hasFlowAnnotation from './util/hasFlowAnnotation'
 import pathsInRange from 'jscodeshift-paths-in-range'
@@ -48,7 +47,6 @@ module.exports = function addStyles(
   const j = api.jscodeshift
 
   const { statement } = j.template
-  const file = fileInfo.path
   const root = j(fileInfo.source)
 
   let filter: Filter
