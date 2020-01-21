@@ -9,8 +9,8 @@ import * as nodepath from 'path'
 import pkgConf from 'pkg-conf'
 import { memoize } from 'lodash'
 
-const getSystem = `
-var system = require('@material-ui/system')
+const getSystem = (dir: string): string => `
+var system = require('${dir}/node_modules/@material-ui/system')
 
 var result = {}
 
@@ -39,18 +39,27 @@ const findRoot = (file: string): string => {
 }
 
 const getSystemImports = memoize(
-  (cwd: string): Record<string, string> => {
-    const babelNode = nodepath.join(
-      findRoot(__filename),
-      'node_modules',
-      '.bin',
-      'babel-node'
-    )
+  (dir: string): Record<string, string> => {
+    const cwd = findRoot(__filename)
 
-    const out = execFileSync(babelNode, ['-e', getSystem], {
-      cwd,
-      encoding: 'utf8',
-    })
+    const babelNode = nodepath.join(cwd, 'node_modules', '.bin', 'babel-node')
+
+    const out = execFileSync(
+      babelNode,
+      [
+        '--presets',
+        '@babel/preset-env',
+        '--plugins',
+        '@babel/plugin-proposal-export-default-from',
+        '@babel/plugin-proposal-export-namespace-from',
+        '-e',
+        getSystem(dir),
+      ],
+      {
+        cwd,
+        encoding: 'utf8',
+      }
+    )
 
     return JSON.parse(out)
   }
