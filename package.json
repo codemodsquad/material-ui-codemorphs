@@ -107,6 +107,7 @@
     "@types/lodash": "^4.14.149",
     "@types/mocha": "^5.2.7",
     "@types/node": "^12.12.6",
+    "@types/prettier": "^1.19.0",
     "@types/resolve": "^1.14.0",
     "babel-eslint": "^10.0.1",
     "babel-plugin-istanbul": "^5.1.0",
