@@ -69,7 +69,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jedwards1211/material-ui-codemorphs.git"
+    "url": "https://github.com/codemodsquad/material-ui-codemorphs.git"
   },
   "keywords": [
     "material-ui",
@@ -78,9 +78,9 @@
   "author": "Andy Edwards",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/jedwards1211/material-ui-codemorphs/issues"
+    "url": "https://github.com/codemodsquad/material-ui-codemorphs/issues"
   },
-  "homepage": "https://github.com/jedwards1211/material-ui-codemorphs#readme",
+  "homepage": "https://github.com/codemodsquad/material-ui-codemorphs#readme",
   "devDependencies": {
     "@babel/cli": "^7.1.5",
     "@babel/core": "^7.1.6",
