@@ -59,6 +59,19 @@ You can also configure this by adding the following to your `package.json`:
 }
 ```
 
+### `makeStylesImport` (_optional_)
+
+Overrides the `import` statement added by `useStyles` for importing `makeStyles`.
+You can also configure this by adding the following to your `package.json`:
+
+```json
+{
+  "material-ui-codemorphs": {
+    "makeStylesImport": "import { makeStyles } from '@material-ui/core'"
+  }
+}
+```
+
 ## Flow Example
 
 ### Before
@@ -167,6 +180,19 @@ You can also configure this by adding the following to your `package.json`:
 {
   "material-ui-codemorphs": {
     "themeImport": "import { type Theme } from './src/universal/theme'"
+  }
+}
+```
+
+### `withStylesImport` (_optional_)
+
+Overrides the `import` statement added by `useStyles` for importing `withStyles`.
+You can also configure this by adding the following to your `package.json`:
+
+```json
+{
+  "material-ui-codemorphs": {
+    "withStylesImport": "import { withStyles } from '@material-ui/core'"
   }
 }
 ```

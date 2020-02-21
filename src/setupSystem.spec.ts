@@ -26,7 +26,8 @@ const Bar = () => <Box boxShadow={1} />
       source,
     }
     const api = {
-      jscodeshift: j.withParser('babel'),
+      j: j.withParser('babylon'),
+      jscodeshift: j.withParser('babylon'),
       stats,
       report: process.stdout.write.bind(process.stdout),
     }
@@ -58,6 +59,7 @@ const Bar = () => <Box boxShadow={1} />
       source,
     }
     const api = {
+      j: j.withParser('babel'),
       jscodeshift: j.withParser('babel'),
       stats,
       report: process.stdout.write.bind(process.stdout),
@@ -84,6 +86,7 @@ const Foo = () => <Box marginLeft={2} />
       source,
     }
     const api = {
+      j: j.withParser('babel'),
       jscodeshift: j.withParser('babel'),
       stats,
       report: process.stdout.write.bind(process.stdout),
@@ -114,6 +117,7 @@ const Foo = () => <Box marginLeft={2} />
       source,
     }
     const api = {
+      j: j.withParser('babel'),
       jscodeshift: j.withParser('babel'),
       stats,
       report: process.stdout.write.bind(process.stdout),
@@ -140,6 +144,7 @@ const Bar = () => <Box boxShadow={1} />
       source,
     }
     const api = {
+      j: j.withParser('babel'),
       jscodeshift: j.withParser('babel'),
       stats,
       report: process.stdout.write.bind(process.stdout),
@@ -169,6 +174,7 @@ const Bar = () => <Box boxShadow={1} />
       source,
     }
     const api = {
+      j: j.withParser('tsx'),
       jscodeshift: j.withParser('tsx'),
       stats,
       report: process.stdout.write.bind(process.stdout),

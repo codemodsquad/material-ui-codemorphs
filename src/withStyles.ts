@@ -1,9 +1,6 @@
 import addImports from 'jscodeshift-add-imports'
 import {
   ObjectPattern,
-  ASTPath,
-  Node,
-  JSCodeshift,
   ExportDefaultDeclaration,
   FunctionDeclaration,
   ArrowFunctionExpression,
@@ -12,69 +9,50 @@ import {
   Statement,
   Identifier,
   FunctionExpression,
+  FileInfo,
+  API,
 } from 'jscodeshift'
 import { Collection } from 'jscodeshift/src/Collection'
 import { lowerFirst } from 'lodash'
 import hasFlowAnnotation from './util/hasFlowAnnotation'
-import pathsInRange from 'jscodeshift-paths-in-range'
-import importTheme from './util/importTheme'
 import flowClassesTypeAlias from './util/flowClassesTypeAlias'
 import getPropsType from './util/getPropsType'
 import addClassesToPropsType from './util/addClassesToPropsType'
 import shorthandProperty from './util/shorthandProperty'
 import isReactComponentClass from './util/isReactComponentClass'
 import addPropertyBeforeRestElement from './util/addPropertyBeforeRestElement'
-import getStylesPackage from './util/getStylesPackage'
-
-type Filter = (
-  path: ASTPath<Node>,
-  index: number,
-  paths: Array<ASTPath<Node>>
-) => boolean
+import { getFilter } from './util/filter'
+import getImports from './util/getImports'
 
 module.exports = function addStyles(
-  fileInfo: { path: string; source: string },
-  api: {
-    jscodeshift: JSCodeshift
-    stats: (value: string) => void
-    report: (value: string) => void
-  },
+  fileInfo: FileInfo,
+  api: API,
   options: {
     selectionStart?: string
     selectionEnd?: string
     themeImport?: string
   }
 ): string {
-  const j = api.jscodeshift
-
+  const { j } = api
   const { statement } = j.template
   const root = j(fileInfo.source)
 
-  let filter: Filter
-  if (options.selectionStart) {
-    const selectionStart = parseInt(options.selectionStart)
-    const selectionEnd = options.selectionEnd
-      ? parseInt(options.selectionEnd)
-      : selectionStart
-    filter = pathsInRange(selectionStart, selectionEnd)
-  } else {
-    filter = (): boolean => true
+  const isFlow = hasFlowAnnotation(root)
+  const isTypeScript = /\.tsx?$/i.test(fileInfo.path)
+
+  const { themeImport, withStylesImport } = getImports(fileInfo, api, options)
+
+  const {
+    [withStylesImport.specifiers[0].local?.name || 'withStyles']: withStyles,
+  } = addImports(root, withStylesImport)
+  let Theme
+  if (isFlow || isTypeScript) {
+    ;({
+      [themeImport.specifiers[0].local?.name || 'Theme']: Theme,
+    } = addImports(root, themeImport))
   }
 
-  const isFlow = hasFlowAnnotation(root)
-
-  const { withStyles } = addImports(
-    root,
-    statement([
-      `import { withStyles } from '${getStylesPackage(fileInfo.path)}';`,
-    ])
-  )
-  const Theme = importTheme({
-    root,
-    jscodeshift: j,
-    file: fileInfo.path,
-    themeImport: options.themeImport,
-  })
+  const filter = getFilter(options)
 
   const arrowFunction = root
     .find(j.ArrowFunctionExpression)

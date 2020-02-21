@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { JSCodeshift } from 'jscodeshift'
+import { FileInfo, API } from 'jscodeshift'
 import addImports from 'jscodeshift-add-imports'
 import pipeline from './util/pipeline'
 import { uniq, map, compact, flatMap } from 'lodash/fp'
@@ -31,8 +31,8 @@ const getSystemImports = (dir: string): Record<string, string> => {
 }
 
 module.exports = function setupMaterialUISystem(
-  { path, source }: { path: string; source: string },
-  { jscodeshift: j }: { jscodeshift: JSCodeshift }
+  { path, source }: FileInfo,
+  { j }: API
 ): string {
   const root = j(source)
   const { statement } = j.template

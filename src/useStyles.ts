@@ -1,8 +1,5 @@
 import addImports from 'jscodeshift-add-imports'
 import {
-  ASTPath,
-  Node,
-  JSCodeshift,
   ExportDefaultDeclaration,
   FunctionDeclaration,
   ArrowFunctionExpression,
@@ -10,59 +7,43 @@ import {
   Statement,
   Identifier,
   FunctionExpression,
+  FileInfo,
+  API,
 } from 'jscodeshift'
 import { Collection } from 'jscodeshift/src/Collection'
-import pathsInRange from 'jscodeshift-paths-in-range'
-import importTheme from './util/importTheme'
-import getStylesPackage from './util/getStylesPackage'
-
-type Filter = (
-  path: ASTPath<Node>,
-  index: number,
-  paths: Array<ASTPath<Node>>
-) => boolean
+import { getFilter } from './util/filter'
+import getImports from './util/getImports'
+import hasFlowAnnotation from './util/hasFlowAnnotation'
 
 module.exports = function addStyles(
-  fileInfo: { path: string; source: string },
-  api: {
-    jscodeshift: JSCodeshift
-    stats: (value: string) => void
-    report: (value: string) => void
-  },
+  fileInfo: FileInfo,
+  api: API,
   options: {
     selectionStart?: string
     selectionEnd?: string
     themeImport?: string
   }
 ): string {
-  const j = api.jscodeshift
+  const { j } = api
 
   const { statement } = j.template
   const root = j(fileInfo.source)
+  const isFlow = hasFlowAnnotation(root)
+  const isTypeScript = /\.tsx?$/i.test(fileInfo.path)
 
-  let filter: Filter
-  if (options.selectionStart) {
-    const selectionStart = parseInt(options.selectionStart)
-    const selectionEnd = options.selectionEnd
-      ? parseInt(options.selectionEnd)
-      : selectionStart
-    filter = pathsInRange(selectionStart, selectionEnd)
-  } else {
-    filter = (): boolean => true
+  const filter = getFilter(options)
+
+  const { themeImport, makeStylesImport } = getImports(fileInfo, api, options)
+
+  const {
+    [makeStylesImport.specifiers[0].local?.name || 'makeStyles']: makeStyles,
+  } = addImports(root, makeStylesImport)
+  let Theme
+  if (isFlow || isTypeScript) {
+    ;({
+      [themeImport.specifiers[0].local?.name || 'Theme']: Theme,
+    } = addImports(root, themeImport))
   }
-
-  const { makeStyles } = addImports(
-    root,
-    statement([
-      `import { makeStyles } from '${getStylesPackage(fileInfo.path)}';`,
-    ])
-  )
-  const Theme = importTheme({
-    root,
-    jscodeshift: j,
-    file: fileInfo.path,
-    themeImport: options.themeImport,
-  })
 
   const arrowFunction = root
     .find(j.ArrowFunctionExpression)
