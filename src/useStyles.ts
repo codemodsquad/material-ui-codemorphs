@@ -93,6 +93,7 @@ try positioning the cursor inside a function component.`)
   const componentName = componentNameNode.name
 
   const componentNode = component.nodes()[0]
+  const propsParam = componentNode.params[0]
 
   let declaration:
     | Collection<Statement>
@@ -130,7 +131,9 @@ try positioning the cursor inside a function component.`)
   }
 
   componentNode.body.body.unshift(
-    statement([`const classes = ${useStyles}();`])
+    propsParam?.type === 'Identifier'
+      ? statement`const classes = ${j.identifier(useStyles)}(${propsParam});`
+      : statement`const classes = ${j.identifier(useStyles)}();`
   )
 
   return root.toSource()
