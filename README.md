@@ -81,9 +81,9 @@ You can also configure this by adding the following to your `package.json`:
 
 import * as React from 'react'
 
-const Test = ({ text }) => (
+const Test = props => (
   // position
-  <div>{text}</div>
+  <div>{props.text}</div>
 )
 ```
 
@@ -107,9 +107,9 @@ import { type Theme } from '../../src/universal/theme'
 
 const useStyles = makeStyles((theme: Theme) => ({}))
 
-const Test = ({ text }) => {
-  const classes = useStyles()
-  return <div>{text}</div>
+const Test = props => {
+  const classes = useStyles(props)
+  return <div>{props.text}</div>
 }
 ```
 
