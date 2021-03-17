@@ -15,7 +15,6 @@ import {
 import { Collection } from 'jscodeshift/src/Collection'
 import { lowerFirst } from 'lodash'
 import hasFlowAnnotation from './util/hasFlowAnnotation'
-import flowClassesTypeAlias from './util/flowClassesTypeAlias'
 import getPropsType from './util/getPropsType'
 import addClassesToPropsType from './util/addClassesToPropsType'
 import shorthandProperty from './util/shorthandProperty'
@@ -162,6 +161,14 @@ try positioning the cursor inside a component.`)
 
   let afterStyles: Collection<any> = declaration // eslint-disable-line @typescript-eslint/no-explicit-any
 
+  let Classes: string | undefined
+
+  if (isFlow) {
+    Classes = declaration.paths()[0].scope.lookupType('Classes')
+      ? `${componentName}Classes`
+      : 'Classes'
+  }
+
   const styles = declaration.paths()[0].scope.lookup('styles')
     ? `${lowerFirst(componentName)}Styles`
     : 'styles'
@@ -173,6 +180,7 @@ try positioning the cursor inside a component.`)
       root,
       path: propsTypeAnnotation,
       styles,
+      Classes,
     })
     const exportDecl = j([propsTypeAnnotation]).closest(
       j.ExportNamedDeclaration
@@ -188,17 +196,26 @@ try positioning the cursor inside a component.`)
     }
   }
 
-  if (isFlow && !root.find(j.TypeAlias, { id: { name: 'Classes' } }).size()) {
-    afterStyles.insertBefore(flowClassesTypeAlias(j))
+  if (Classes) {
+    afterStyles.insertBefore(statement([`\n\ntype ${Classes} = {|\n\n|}`]))
+    afterStyles.insertBefore(
+      statement([
+        `\n\nconst ${styles} = ${
+          Theme ? `(theme: ${Theme})` : '(theme)'
+        }: $ObjMap<${Classes}, () => { ... }> => ({
+
+  })\n\n`,
+      ])
+    )
+  } else {
+    afterStyles.insertBefore(
+      statement([
+        `\n\nconst ${styles} = ${Theme ? `(theme: ${Theme})` : 'theme'} => ({
+
+  })\n\n`,
+      ])
+    )
   }
-
-  afterStyles.insertBefore(
-    statement([
-      `\n\nconst ${styles} = ${Theme ? `(theme: ${Theme})` : 'theme'} => ({
-
-})\n\n`,
-    ])
-  )
   if (exportNamedDeclaration.size()) {
     declaration.insertAfter(
       j.exportNamedDeclaration(null, [

@@ -110,19 +110,40 @@ try positioning the cursor inside a function component.`)
 
   const afterStyles: Collection<any> = declaration // eslint-disable-line @typescript-eslint/no-explicit-any
 
+  let Classes: string | undefined
+
+  if (isFlow) {
+    Classes = declaration.paths()[0].scope.lookupType('Classes')
+      ? `${componentName}Classes`
+      : 'Classes'
+  }
+
   const useStyles = declaration.paths()[0].scope.lookup('useStyles')
     ? `use${componentName}Styles`
     : 'useStyles'
 
-  afterStyles.insertBefore(
-    statement([
-      `\n\nconst ${useStyles} = ${makeStyles}(${
-        Theme ? `(theme: ${Theme})` : 'theme'
-      } => ({
+  if (Classes) {
+    afterStyles.insertBefore(statement([`\n\ntype ${Classes} = {|\n\n|}`]))
+    afterStyles.insertBefore(
+      statement([
+        `\n\nconst ${useStyles} = ${makeStyles}(${
+          Theme ? `(theme: ${Theme})` : '(theme)'
+        }: $ObjMap<${Classes}, () => { ... }> => ({
 
 }));\n\n`,
-    ])
-  )
+      ])
+    )
+  } else {
+    afterStyles.insertBefore(
+      statement([
+        `\n\nconst ${useStyles} = ${makeStyles}(${
+          Theme ? `(theme: ${Theme})` : 'theme'
+        } => ({
+
+}));\n\n`,
+      ])
+    )
+  }
 
   if (componentNode.body.type !== 'BlockStatement') {
     componentNode.body = j.blockStatement([
@@ -130,11 +151,20 @@ try positioning the cursor inside a function component.`)
     ])
   }
 
-  componentNode.body.body.unshift(
+  const classesDeclaration =
     propsParam?.type === 'Identifier'
-      ? statement`const classes = ${j.identifier(useStyles)}(${propsParam});`
+      ? statement`const classes = ${j.identifier(useStyles)}(${j.identifier(
+          propsParam.name
+        )});`
       : statement`const classes = ${j.identifier(useStyles)}();`
-  )
+
+  if (Classes) {
+    classesDeclaration.declarations[0].id.typeAnnotation = j.typeAnnotation(
+      j.genericTypeAnnotation(j.identifier(Classes), null)
+    )
+  }
+
+  componentNode.body.body.unshift(classesDeclaration)
 
   return root.toSource()
 }

@@ -27,14 +27,21 @@ export default function addClassesToPropsType(options: {
     | ASTPath<InterfaceDeclaration>
     | ASTPath<TSInterfaceDeclaration>
   styles: string
+  Classes: string | undefined
 }): void {
-  const { j, root, path, styles } = options
+  const { j, root, path, styles, Classes } = options
   const isFlow = hasFlowAnnotation(root)
   const { statement } = j.template
   const { node } = path
   switch (node.type) {
     case 'TypeAlias': {
-      addClassesToPropsType({ j, root, path: path.get('right'), styles })
+      addClassesToPropsType({
+        j,
+        root,
+        path: path.get('right'),
+        styles,
+        Classes,
+      })
       break
     }
     case 'TSInterfaceDeclaration': {
@@ -52,15 +59,19 @@ export default function addClassesToPropsType(options: {
       break
     }
     case 'InterfaceDeclaration': {
+      if (!Classes)
+        throw new Error(`Classes must be provided when code is Flow`)
       node.body.properties.push(
-        flowClassesPropTypeAnnotation(j, j.identifier(styles))
+        flowClassesPropTypeAnnotation(j, j.identifier(Classes))
       )
       break
     }
     case 'ObjectTypeAnnotation': {
+      if (!Classes)
+        throw new Error(`Classes must be provided when code is Flow`)
       if (isFlow) {
         node.properties.push(
-          flowClassesPropTypeAnnotation(j, j.identifier(styles))
+          flowClassesPropTypeAnnotation(j, j.identifier(Classes))
         )
       }
       break

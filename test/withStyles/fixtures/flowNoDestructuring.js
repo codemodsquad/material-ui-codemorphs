@@ -17,15 +17,17 @@ import { withStyles } from "@material-ui/core/styles";
 
 import { type Theme } from "../../src/universal/theme";
 
-type Classes<Styles> = $Call<<T>((any) => T) => { [$Keys<T>]: string }, Styles>
+type Classes = {|
 
-const styles = (theme: Theme) => ({
+|}
+
+const styles = (theme: Theme): $ObjMap<Classes, () => { ... }> => ({
 
 })
 
 type Props = {
   +text: string,
-  +classes: Classes<typeof styles>,
+  +classes: Classes,
 };
 
 const TestWithStyles = (props: Props) => {
