@@ -29,7 +29,7 @@ const styles = (theme: Theme): $ObjMap<Classes, () => { ... }> => ({
 
 type Props = {
   +text: string,
-  +classes: Classes,
+  classes: Classes,
 };
 
 function TestWithStyles(

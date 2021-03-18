@@ -20,8 +20,9 @@ const useTestStyles = makeStyles(theme => ({
 
 }));
 
-const Test = ({text}) => {
-  const classes = useTestStyles();
+const Test = (props) => {
+  const classes = useTestStyles(props);
+  const {text} = props
   return <div>{text}</div>;
 }
 `

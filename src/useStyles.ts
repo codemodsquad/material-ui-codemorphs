@@ -15,6 +15,10 @@ import { getFilter } from './util/filter'
 import getImports from './util/getImports'
 import hasFlowAnnotation from './util/hasFlowAnnotation'
 
+import getPropsType from './util/getPropsType'
+import addClassesToPropsType from './util/addClassesToPropsType'
+import getPropsIdentifier from './util/getPropsIdentifier'
+
 module.exports = function addStyles(
   fileInfo: FileInfo,
   api: API,
@@ -92,8 +96,8 @@ try positioning the cursor inside a function component.`)
 
   const componentName = componentNameNode.name
 
+  const componentPath = component.paths()[0]
   const componentNode = component.nodes()[0]
-  const propsParam = componentNode.params[0]
 
   let declaration:
     | Collection<Statement>
@@ -108,7 +112,7 @@ try positioning the cursor inside a function component.`)
   if (exportNamedDeclaration.size()) declaration = exportNamedDeclaration
   if (exportDefaultDeclaration.size()) declaration = exportDefaultDeclaration
 
-  const afterStyles: Collection<any> = declaration // eslint-disable-line @typescript-eslint/no-explicit-any
+  let afterStyles: Collection<any> = declaration // eslint-disable-line @typescript-eslint/no-explicit-any
 
   let Classes: string | undefined
 
@@ -116,6 +120,29 @@ try positioning the cursor inside a function component.`)
     Classes = declaration.paths()[0].scope.lookupType('Classes')
       ? `${componentName}Classes`
       : 'Classes'
+  }
+
+  const propsTypeAnnotation = getPropsType(componentPath)
+  if (propsTypeAnnotation) {
+    addClassesToPropsType({
+      j,
+      root,
+      path: propsTypeAnnotation,
+      Classes,
+      overrides: true,
+    })
+    const exportDecl = j([propsTypeAnnotation]).closest(
+      j.ExportNamedDeclaration
+    )
+    if (exportDecl.size()) afterStyles = exportDecl
+    else {
+      switch (propsTypeAnnotation.node.type) {
+        case 'TypeAlias':
+        case 'InterfaceDeclaration':
+        case 'TSInterfaceDeclaration':
+          afterStyles = j([propsTypeAnnotation])
+      }
+    }
   }
 
   const useStyles = declaration.paths()[0].scope.lookup('useStyles')
@@ -151,12 +178,11 @@ try positioning the cursor inside a function component.`)
     ])
   }
 
-  const classesDeclaration =
-    propsParam?.type === 'Identifier'
-      ? statement`const classes = ${j.identifier(useStyles)}(${j.identifier(
-          propsParam.name
-        )});`
-      : statement`const classes = ${j.identifier(useStyles)}();`
+  const propsIdentifier = getPropsIdentifier(componentPath)
+
+  const classesDeclaration = statement`const classes = ${j.identifier(
+    useStyles
+  )}(${j.identifier(propsIdentifier.name)});`
 
   if (Classes) {
     classesDeclaration.declarations[0].id.typeAnnotation = j.typeAnnotation(

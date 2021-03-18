@@ -25,8 +25,9 @@ const useStyles = makeStyles((theme: Theme): $ObjMap<Classes, () => { ... }> => 
 
 }));
 
-const Test = ({text}) => {
-  const classes: Classes = useStyles();
+const Test = (props) => {
+  const classes: Classes = useStyles(props);
+  const {text} = props
   return <div>{text}</div>;
 }
 `

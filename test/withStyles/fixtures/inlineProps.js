@@ -26,7 +26,7 @@ const TestWithStyles = ({
   classes
 }: {
   +text: string,
-  +classes: Classes,
+  classes: Classes,
 }): React.Node => (
   <div>{text}</div>
 );

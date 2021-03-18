@@ -3,10 +3,14 @@ export const input = `
 
 import * as React from 'react'
 
-const Test = React.forwardRef(({text}, ref) => (
+type Props = {
+  text: string,
+}
+
+const Test = ({text}: Props) => (
   // position
-  <div ref={ref}>{text}</div>
-))
+  <div>{text}</div>
+)
 `
 
 export const output = `
@@ -25,9 +29,16 @@ const useStyles = makeStyles((theme: Theme): $ObjMap<Classes, () => { ... }> => 
 
 }));
 
-const Test = React.forwardRef((props, ref) => {
+type Props = {
+  text: string,
+  classes?: $Shape<Classes>,
+}
+
+const Test = (props: Props) => {
   const classes: Classes = useStyles(props);
+
   const {text} = props
-  return <div ref={ref}>{text}</div>;
-})
+
+  return <div>{text}</div>;
+}
 `

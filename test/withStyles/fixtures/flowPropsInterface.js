@@ -27,7 +27,7 @@ const styles = (theme: Theme): $ObjMap<Classes, () => { ... }> => ({
 
 interface Props {
   +text: string,
-  +classes: Classes,
+  classes: Classes,
 }
 
 const TestWithStyles = ({

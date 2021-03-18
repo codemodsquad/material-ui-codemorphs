@@ -26,10 +26,11 @@ export default function addClassesToPropsType(options: {
     | ASTPath<TypeAlias>
     | ASTPath<InterfaceDeclaration>
     | ASTPath<TSInterfaceDeclaration>
-  styles: string
-  Classes: string | undefined
+  styles?: string
+  Classes?: string
+  overrides?: boolean
 }): void {
-  const { j, root, path, styles, Classes } = options
+  const { j, root, path, styles, Classes, overrides } = options
   const isFlow = hasFlowAnnotation(root)
   const { statement } = j.template
   const { node } = path
@@ -41,10 +42,12 @@ export default function addClassesToPropsType(options: {
         path: path.get('right'),
         styles,
         Classes,
+        overrides,
       })
       break
     }
     case 'TSInterfaceDeclaration': {
+      if (!styles) throw new Error(`styles must be provided when code is TS`)
       const { WithStyles } = addImports(
         root,
         statement([`import { WithStyles } from '@material-ui/core/styles'`])
@@ -62,7 +65,7 @@ export default function addClassesToPropsType(options: {
       if (!Classes)
         throw new Error(`Classes must be provided when code is Flow`)
       node.body.properties.push(
-        flowClassesPropTypeAnnotation(j, j.identifier(Classes))
+        flowClassesPropTypeAnnotation(j, j.identifier(Classes), { overrides })
       )
       break
     }
@@ -71,7 +74,7 @@ export default function addClassesToPropsType(options: {
         throw new Error(`Classes must be provided when code is Flow`)
       if (isFlow) {
         node.properties.push(
-          flowClassesPropTypeAnnotation(j, j.identifier(Classes))
+          flowClassesPropTypeAnnotation(j, j.identifier(Classes), { overrides })
         )
       }
       break

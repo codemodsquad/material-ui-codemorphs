@@ -35,7 +35,7 @@ const styles = (theme: Theme): $ObjMap<Classes, () => { ... }> => ({
 
 })
 
-export type Props = { +classes: Classes }
+export type Props = { classes: Classes }
 
 const TempWithStyles = ({
  text,

@@ -16,8 +16,9 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 }));
 
-const Test = ({text}) => {
-  const classes = useStyles();
+const Test = (props) => {
+  const classes = useStyles(props);
+  const {text} = props
   return <div>{text}</div>;
 }
 `

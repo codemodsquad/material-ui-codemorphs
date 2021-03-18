@@ -1,10 +1,10 @@
 export const input = `
 import * as React from 'react'
 
-function Test({text}) {
+const Test = ({text}) => (
   // position
-  return <div>{text}</div>
-}
+  <div>{text}</div>
+)
 `
 
 export const output = `
@@ -16,7 +16,7 @@ const useStyles = makeStyles(theme => ({
 
 }));
 
-function Test(props) {
+const Test = (props) => {
   const classes = useStyles(props);
   const {text} = props
   return <div>{text}</div>
