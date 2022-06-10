@@ -125,7 +125,7 @@
     "require-glob": "^3.2.0",
     "resolve": "^1.14.2",
     "rimraf": "^2.6.0",
-    "semantic-release": "^17.1.2",
+    "semantic-release": "^19.0.3",
     "typescript": "^3.7.2"
   },
   "dependencies": {
